@@ -177,25 +177,26 @@ describe('Auth endpoints', function () {
         {
           algorithm: 'HS256',
           subject: username,
-          expiresIn: Math.floor(Date.now() / 1000) - 10 // Expired ten seconds ago
+          expiresIn: Math.floor(Date.now() / 1000) - 1 // Expired ten seconds ago
         }
       );
-
+      setTimeout(() => {
       return chai
         .request(app)
         .post('/api/auth/refresh')
         .set('authorization', `Bearer ${token}`)
-        .then(() =>
-          expect.fail(null, null, 'Request should not succeed')
+        .then((res) =>
+          //expect.fail(null, null, 'Request should not succeed')
+          expect(res.statusCode).to.equal(401)
         )
-        .catch(err => {
-          if (err instanceof chai.AssertionError) {
-            throw err;
-          }
+        // .catch(err => {
+        //   if (err instanceof chai.AssertionError) {
+        //     throw err;
+        //   }
 
-          const res = err.response;
-          expect(res).to.have.status(401);
-        });
+          // const res = err.response;
+          // expect(res).to.have.status(401);
+        }, 1500);
     });
     it('Should return a valid auth token with a newer expiry date', function () {
       const token = jwt.sign(
@@ -210,7 +211,7 @@ describe('Auth endpoints', function () {
         {
           algorithm: 'HS256',
           subject: username,
-          expiresIn: '7d'
+          expiresIn: '15m'
         }
       );
       const decoded = jwt.decode(token);
